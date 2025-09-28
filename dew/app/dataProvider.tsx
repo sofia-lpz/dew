@@ -1,36 +1,34 @@
 // This file provides data for the application
+import { indexedSite } from './interfaces';
 
 const server = 'http://localhost:3000';
-const server2 = "http://localhost:3001"; // Not used currently
+const server2 = "http://localhost:3001";
 
 
-export const getIndexedSites = () => {
-    return [
-        {
-            title: "Example Site 1",
-            description: "This is an example site.",
-            address: "https://example1.com",
-            ispublic: true,
-        },
-        {
-            title: "Example Site 2",
-            description: "This is another example site.",
-            address: "https://example2.com",
-            ispublic: false,
-        },
-        {
-            title: "Sample Site",
-            description: "A sample site for testing.",
-            address: "https://sample.com",
-            ispublic: true,
-        },
-        {
-            title: "Test Site",
-            description: "A site used for testing purposes.",
-            address: "https://testsite.com",
-            ispublic: true,
-        },
-    ];
+export const getIndexedSites = async (): Promise<indexedSite[]> => {
+    // endpoint /alladdresses
+    try {
+        const response = await fetch(`${server}/alladdresses`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        
+        // Transform the API response to match indexedSite interface
+        if (data.success && data.addresses && Array.isArray(data.addresses)) {
+            return data.addresses.map((item: { address: string; title: string }) => ({
+                title: item.title,
+                description: '', // API doesn't provide description, using empty string
+                address: item.address,
+                ispublic: true // API doesn't provide ispublic flag, defaulting to true
+            }));
+        }
+        
+        return [];
+    } catch (error) {
+        console.error('Error fetching indexed sites:', error);
+        return [];
+    }
 };
 
 export const getSiteContent = async (address: string): Promise<{ success: boolean; html: string }> => {
