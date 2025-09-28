@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Footer from "./footer";
 
 export const metadata: Metadata = {
   title: "Rainfall",
@@ -14,7 +15,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <div className="layout-container">
+          <main className="main-content">
+            {children}
+          </main>
+          <Footer />
+        </div>
       </body>
     </html>
   );

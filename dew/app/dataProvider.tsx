@@ -28,3 +28,14 @@ export const getIndexedSites = () => {
         },
     ];
 };
+
+export const sendWebsiteToAPI = async (htmlCode: string): Promise<string> => {
+    // Simulate an API call to send the website HTML code
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            // Simulate success response with a generated URL
+            const randomId = Math.random().toString(36).substring(2, 8);
+            resolve(`https://rainfall.net/${randomId}`);
+        }, 2000);
+    });
+};

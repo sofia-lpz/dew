@@ -3,6 +3,7 @@
 import { indexedSite } from "./interfaces";
 import { getIndexedSites } from "./dataProvider";
 import { siteCard } from "./siteCard";
+import WalletModal from "./walletModal";
 import { useState, useEffect } from "react";
 
 // lists the indexed sites with a google chrome interface
@@ -13,6 +14,7 @@ export default function Browser() {
     const [filteredSites, setFilteredSites] = useState<indexedSite[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [hasSearched, setHasSearched] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         const loadSites = async () => {
@@ -92,7 +94,12 @@ export default function Browser() {
     };
 
     return (
-        <div className={`chrome-browser ${!hasSearched ? 'homepage' : 'results-page'}`}>
+        <>
+            <WalletModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+            />
+            <div className={`chrome-browser ${!hasSearched ? 'homepage' : 'results-page'}`}>
             {!hasSearched ? (
                 // Google homepage-style initial view
                 <div className="homepage-container">
@@ -130,6 +137,12 @@ export default function Browser() {
                                 onClick={() => handleSearch(searchQuery)}
                             >
                                 Search Rainfall
+                            </button>
+                            <button 
+                                className="create-website-button"
+                                onClick={() => setIsModalOpen(true)}
+                            >
+                                Create a Website
                             </button>
                         </div>
                     </div>
@@ -193,6 +206,7 @@ export default function Browser() {
                     </div>
                 </>
             )}
-        </div>
+            </div>
+        </>
     );
 }
