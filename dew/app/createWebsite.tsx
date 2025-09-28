@@ -1,8 +1,14 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import * as dataProvider from './dataProvider';
 
 export default function CreateWebsite() {
+    const searchParams = useSearchParams();
+    const [websiteTitle, setWebsiteTitle] = useState('');
+    const [websiteDescription, setWebsiteDescription] = useState('');
+    const [contractAddress, setContractAddress] = useState<string>('');
     const [htmlCode, setHtmlCode] = useState(`<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,6 +44,82 @@ export default function CreateWebsite() {
     const [sendStatus, setSendStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
+    // Comprehensive HTML minification function
+    const minifyHtml = (html: string): string => {
+        let minified = html;
+        
+        // Remove HTML comments
+        minified = minified.replace(/<!--[\s\S]*?-->/g, '');
+        
+        // Remove unnecessary whitespace and line breaks
+        minified = minified.replace(/\s+/g, ' ');
+        minified = minified.replace(/\n|\r/g, '');
+        
+        // Remove whitespace around HTML tags
+        minified = minified.replace(/>\s+</g, '><');
+        minified = minified.replace(/>\s+/g, '>');
+        minified = minified.replace(/\s+</g, '<');
+        
+        // Minify CSS within style tags
+        minified = minified.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, (match, css) => {
+            let minifiedCss = css;
+            
+            // Remove CSS comments
+            minifiedCss = minifiedCss.replace(/\/\*[\s\S]*?\*\//g, '');
+            
+            // Remove unnecessary whitespace in CSS
+            minifiedCss = minifiedCss.replace(/\s+/g, ' ');
+            minifiedCss = minifiedCss.replace(/;\s+/g, ';');
+            minifiedCss = minifiedCss.replace(/:\s+/g, ':');
+            minifiedCss = minifiedCss.replace(/,\s+/g, ',');
+            minifiedCss = minifiedCss.replace(/{\s+/g, '{');
+            minifiedCss = minifiedCss.replace(/\s+}/g, '}');
+            minifiedCss = minifiedCss.replace(/}\s+/g, '}');
+            
+            // Remove trailing semicolons before closing braces
+            minifiedCss = minifiedCss.replace(/;}/g, '}');
+            
+            // Remove unnecessary units for zero values
+            minifiedCss = minifiedCss.replace(/\b0px\b/g, '0');
+            minifiedCss = minifiedCss.replace(/\b0em\b/g, '0');
+            minifiedCss = minifiedCss.replace(/\b0rem\b/g, '0');
+            minifiedCss = minifiedCss.replace(/\b0%\b/g, '0');
+            
+            // Shorten hex colors where possible
+            minifiedCss = minifiedCss.replace(/#([0-9a-fA-F])\1([0-9a-fA-F])\2([0-9a-fA-F])\3/g, '#$1$2$3');
+            
+            return `<style>${minifiedCss.trim()}</style>`;
+        });
+        
+        // Replace double quotes with single quotes for attributes
+        minified = minified.replace(/="([^"]*)"/g, "='$1'");
+        
+        // Remove redundant attribute values
+        minified = minified.replace(/\s+type=['"]text\/css['"]/gi, '');
+        minified = minified.replace(/\s+type=['"]text\/javascript['"]/gi, '');
+        
+        // Remove optional closing tags for void elements and optional tags
+        minified = minified.replace(/<\/?(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)[^>]*>/gi, (match) => {
+            return match.replace(/\s*\/?>/, match.includes('/>') ? '/>' : '>');
+        });
+        
+        // Remove quotes from attributes when not needed (simple values without spaces)
+        minified = minified.replace(/=(['"])([a-zA-Z0-9\-_]+)\1/g, '=$2');
+        
+        // Trim any remaining leading/trailing whitespace
+        minified = minified.trim();
+        
+        return minified;
+    };
+
+    // Read contract address from URL parameters
+    useEffect(() => {
+        const contract = searchParams.get('contract');
+        if (contract) {
+            setContractAddress(contract);
+        }
+    }, [searchParams]);
+
     // Update the iframe content when HTML changes
     useEffect(() => {
         if (iframeRef.current) {
@@ -52,25 +134,57 @@ export default function CreateWebsite() {
     }, [htmlCode]);
 
     const handleSendToNet = async () => {
+        if (!websiteTitle.trim()) {
+            alert('Please enter a website title before deploying.');
+            return;
+        }
+        
+        if (!contractAddress.trim()) {
+            alert('No contract address found. Please create a contract first.');
+            return;
+        }
+        
         setIsSending(true);
         setSendStatus('idle');
         
         try {
-            // Simulate API call to deploy website
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Process HTML code using comprehensive minification
+            const processedHtmlCode = minifyHtml(htmlCode);
             
-            // Generate a random website URL
-            const randomId = Math.random().toString(36).substring(2, 8);
-            const websiteUrl = `https://rainfall.net/${randomId}`;
+            const result = await dataProvider.setHtmlCode(
+                contractAddress,
+                websiteTitle,
+                websiteDescription,
+                processedHtmlCode
+            );
             
-            setSendStatus('success');
-            
-            // Show success message with URL
-            alert(`Website deployed successfully!\nYour website is now live at: ${websiteUrl}`);
-            
+            if (result && result.success) {
+                // Add website to index after successful deployment
+                try {
+                    const indexResult = await dataProvider.addAddressToIndex(contractAddress, websiteTitle);
+                    if (indexResult.success) {
+                        setSendStatus('success');
+                        console.log('Website successfully deployed and added to index');
+                    } else {
+                        setSendStatus('success'); // Still show success for deployment, but log the indexing issue
+                        console.warn('Website deployed successfully, but failed to add to index');
+                    }
+                } catch (indexError) {
+                    console.error('Error adding website to index:', indexError);
+                    setSendStatus('success'); // Still show success for deployment
+                }
+                
+                setTimeout(() => {
+                    setSendStatus('idle');
+                }, 3000);
+            } else {
+                setSendStatus('error');
+                alert('Failed to deploy website. Please try again.');
+            }
         } catch (error) {
+            console.error('Error deploying website:', error);
             setSendStatus('error');
-            alert('Failed to deploy website. Please try again.');
+            alert('An error occurred while deploying the website.');
         } finally {
             setIsSending(false);
         }
@@ -162,6 +276,31 @@ export default function CreateWebsite() {
                     >
                         {isSending ? 'Sending...' : sendStatus === 'success' ? 'Sent!' : 'Send to the Net'}
                     </button>
+                </div>
+            </div>
+
+            <div className="website-info-form">
+                <div className="form-group">
+                    <label htmlFor="websiteTitle">Title</label>
+                    <input
+                        id="websiteTitle"
+                        type="text"
+                        value={websiteTitle}
+                        onChange={(e) => setWebsiteTitle(e.target.value)}
+                        placeholder="Enter your website title"
+                        className="form-input"
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="websiteDescription">Description</label>
+                    <textarea
+                        id="websiteDescription"
+                        value={websiteDescription}
+                        onChange={(e) => setWebsiteDescription(e.target.value)}
+                        placeholder="Enter your website description"
+                        className="form-input"
+                        style={{ width: '500px' }}
+                    />
                 </div>
             </div>
 
