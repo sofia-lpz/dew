@@ -27,18 +27,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/server1/:path*',
-        destination: 'http://localhost:3000/:path*',
-      },
-      {
-        source: '/api/server2/:path*',
-        destination: 'http://localhost:3001/:path*',
-      },
-    ];
-  },
 };
 
 export default nextConfig;
