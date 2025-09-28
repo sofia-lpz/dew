@@ -198,16 +198,13 @@ export default function CreateWebsite() {
                 }
                 
                 // Hide overlay after showing success briefly, then open website and redirect
-                setTimeout(async () => {
+                setTimeout(() => {
                     setShowLoadingOverlay(false);
                     setSendStatus('idle');
                     
-                    // Open the deployed website in a new tab
-                    try {
-                        await dataProvider.openSiteContentInNewTab(contractAddress, websiteTitle);
-                    } catch (error) {
-                        console.error('Error opening deployed website:', error);
-                    }
+                    // Open the deployed website in a new tab using the direct address URL
+                    const siteUrl = `/${encodeURIComponent(contractAddress)}`;
+                    window.open(siteUrl, '_blank');
                     
                     // Redirect current tab back to the browser/search page
                     setTimeout(() => {
