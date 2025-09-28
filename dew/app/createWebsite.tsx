@@ -17,7 +17,7 @@ export default function CreateWebsite() {
     <title>My Website</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: arial, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
@@ -42,6 +42,9 @@ export default function CreateWebsite() {
 
     const [isSending, setIsSending] = useState(false);
     const [sendStatus, setSendStatus] = useState<'idle' | 'success' | 'error'>('idle');
+    const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
+    const [loadingStep, setLoadingStep] = useState<'processing' | 'deploying' | 'indexing' | 'complete'>('processing');
+    const [loadingMessage, setLoadingMessage] = useState('');
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
     // Comprehensive HTML minification function
@@ -144,13 +147,23 @@ export default function CreateWebsite() {
             return;
         }
         
+        // Initialize loading states
         setIsSending(true);
+        setShowLoadingOverlay(true);
         setSendStatus('idle');
+        setLoadingStep('processing');
+        setLoadingMessage('Preparing your website for deployment...');
         
         try {
-            // Process HTML code using comprehensive minification
+            // Step 1: Process HTML code
+            setLoadingStep('processing');
+            setLoadingMessage('Minifying and optimizing your HTML code...');
+            await new Promise(resolve => setTimeout(resolve, 800)); // Brief pause for user feedback
             const processedHtmlCode = minifyHtml(htmlCode);
             
+            // Step 2: Deploy to network
+            setLoadingStep('deploying');
+            setLoadingMessage('Deploying your website to the decentralized network...');
             const result = await dataProvider.setHtmlCode(
                 contractAddress,
                 websiteTitle,
@@ -159,30 +172,56 @@ export default function CreateWebsite() {
             );
             
             if (result && result.success) {
-                // Add website to index after successful deployment
+                // Step 3: Add to index
+                setLoadingStep('indexing');
+                setLoadingMessage('Adding your website to the public index...');
+                
                 try {
                     const indexResult = await dataProvider.addAddressToIndex(contractAddress, websiteTitle);
+                    
+                    // Step 4: Complete
+                    setLoadingStep('complete');
+                    setLoadingMessage('Website successfully deployed!');
+                    
                     if (indexResult.success) {
                         setSendStatus('success');
                         console.log('Website successfully deployed and added to index');
                     } else {
-                        setSendStatus('success'); // Still show success for deployment, but log the indexing issue
+                        setSendStatus('success'); // Still show success for deployment
                         console.warn('Website deployed successfully, but failed to add to index');
                     }
                 } catch (indexError) {
                     console.error('Error adding website to index:', indexError);
+                    setLoadingStep('complete');
+                    setLoadingMessage('Website deployed! (Index update failed)');
                     setSendStatus('success'); // Still show success for deployment
                 }
                 
-                setTimeout(() => {
+                // Hide overlay after showing success briefly, then open website and redirect
+                setTimeout(async () => {
+                    setShowLoadingOverlay(false);
                     setSendStatus('idle');
-                }, 3000);
+                    
+                    // Open the deployed website in a new tab
+                    try {
+                        await dataProvider.openSiteContentInNewTab(contractAddress, websiteTitle);
+                    } catch (error) {
+                        console.error('Error opening deployed website:', error);
+                    }
+                    
+                    // Redirect current tab back to the browser/search page
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 500); // Small delay to ensure new tab opens first
+                }, 2000);
             } else {
+                setShowLoadingOverlay(false);
                 setSendStatus('error');
                 alert('Failed to deploy website. Please try again.');
             }
         } catch (error) {
             console.error('Error deploying website:', error);
+            setShowLoadingOverlay(false);
             setSendStatus('error');
             alert('An error occurred while deploying the website.');
         } finally {
@@ -200,7 +239,7 @@ export default function CreateWebsite() {
     <title>My Website</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: arial, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
@@ -274,7 +313,9 @@ export default function CreateWebsite() {
                         onClick={handleSendToNet}
                         disabled={isSending}
                     >
-                        {isSending ? 'Sending...' : sendStatus === 'success' ? 'Sent!' : 'Send to the Net'}
+                        <span className="button-text">
+                            {isSending ? 'Deploying...' : sendStatus === 'success' ? 'Deployed!' : 'Send to the Net'}
+                        </span>
                     </button>
                 </div>
             </div>
@@ -282,9 +323,8 @@ export default function CreateWebsite() {
             <div className="website-info-form">
                 <div className="form-group">
                     <label htmlFor="websiteTitle">Title</label>
-                    <input
+                    <textarea
                         id="websiteTitle"
-                        type="text"
                         value={websiteTitle}
                         onChange={(e) => setWebsiteTitle(e.target.value)}
                         placeholder="Enter your website title"
@@ -352,6 +392,44 @@ export default function CreateWebsite() {
                     </div>
                 </div>
             </div>
+
+            {/* Loading Overlay */}
+            {showLoadingOverlay && (
+                <div className="loading-overlay">
+                    <div className="loading-content">
+                        <div className="loading-spinner"></div>
+                        <h3 className="loading-title">Deploying Your Website</h3>
+                        <p className="loading-description">{loadingMessage}</p>
+                        
+                        <div className="loading-progress">
+                            <div className={`loading-step ${loadingStep === 'processing' ? 'active' : loadingStep !== 'processing' ? 'completed' : ''}`}>
+                                <div className="loading-step-icon"></div>
+                                <span>Processing</span>
+                            </div>
+                            <div className={`loading-step ${loadingStep === 'deploying' ? 'active' : ['indexing', 'complete'].includes(loadingStep) ? 'completed' : ''}`}>
+                                <div className="loading-step-icon"></div>
+                                <span>Deploying</span>
+                            </div>
+                            <div className={`loading-step ${loadingStep === 'indexing' ? 'active' : loadingStep === 'complete' ? 'completed' : ''}`}>
+                                <div className="loading-step-icon"></div>
+                                <span>Indexing</span>
+                            </div>
+                            <div className={`loading-step ${loadingStep === 'complete' ? 'active completed' : ''}`}>
+                                <div className="loading-step-icon"></div>
+                                <span>Complete</span>
+                            </div>
+                        </div>
+                        
+                        <div style={{ marginTop: '20px', fontSize: '12px', color: 'var(--text-tertiary)' }}>
+                            {loadingStep === 'complete' 
+                                ? 'Opening your website and returning to browser...' 
+                                : 'Please wait while we deploy your website to the decentralized network.'
+                            }
+                        </div>
+                    </div>
+                </div>
+            )}
+            
         </div>
     );
 }

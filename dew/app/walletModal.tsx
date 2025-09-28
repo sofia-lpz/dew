@@ -18,12 +18,8 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
     // Generate deposit account and create contract when modal opens
     useEffect(() => {
         if (isOpen) {
-            // Generate deposit account number immediately
-            const generateDepositAccount = () => {
-                const number = Math.floor(Math.random() * 900000000000) + 100000000000;
-                return number.toString();
-            };
-            setDepositAccountNumber(generateDepositAccount());
+            // Set the specific deposit account number
+            setDepositAccountNumber('mn_shield-addr_test1kaak22cyvzc3qqznzd70f3nf30plx7lqhhm7jgqearcsy6fg9hkqxqyu0pyfj2kyqwe2fx8x3jqhqmrnd6k28phz7waefxz9ftd4xnvr6vpaxrgu');
             
             const createNewContract = async () => {
                 setIsCreatingContract(true);
@@ -131,14 +127,8 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                                 onClick={() => {
                                     // Trigger contract creation again
                                     const createNewContract = async () => {
-                                        // Generate new deposit account
-                                        const generateDepositAccount = () => {
-                                            const number = Math.floor(Math.random() * 900000000000) + 100000000000;
-                                            return number.toString();
-                                        };
-                                        setDepositAccountNumber(generateDepositAccount());
-                                        
-                                        setIsCreatingContract(true);
+                        // Set the specific deposit account number
+                        setDepositAccountNumber('mn_shield-addr_test1kaak22cyvzc3qqznzd70f3nf30plx7lqhhm7jgqearcsy6fg9hkqxqyu0pyfj2kyqwe2fx8x3jqhqmrnd6k28phz7waefxz9ftd4xnvr6vpaxrgu');                                        setIsCreatingContract(true);
                                         setError('');
                                         setContractCreated(false);
                                         setContractAddress('');
