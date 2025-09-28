@@ -311,7 +311,7 @@ export default function CreateWebsite() {
                         disabled={isSending}
                     >
                         <span className="button-text">
-                            {isSending ? 'Deploying...' : sendStatus === 'success' ? 'Deployed!' : 'Send to the Net'}
+                            {isSending ? 'Deploying...' : sendStatus === 'success' ? 'Deployed!' : 'Send to Rainfall'}
                         </span>
                     </button>
                 </div>
