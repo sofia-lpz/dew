@@ -9,7 +9,7 @@ export const siteCard = (site: indexedSite) => {
 
     const handleSiteClick = async (e: React.MouseEvent) => {
         e.preventDefault();
-        await openSiteContentInNewTab(site.address, site.title);
+        await openSiteContentInNewTab(site.address);
     };
 
     return (
