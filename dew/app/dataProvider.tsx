@@ -10,9 +10,6 @@ export const getIndexedSites = async (): Promise<indexedSite[]> => {
     try {
         const response = await fetch(`${server2}/returnAllAddresses`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
         });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -62,9 +59,7 @@ export const createContract = async (): Promise<{ success: boolean; contractAddr
     try {
         const response = await fetch(`${server}/generateNewPageContract`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+
         });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
