@@ -1,14 +1,14 @@
 // This file provides data for the application
 import { indexedSite } from './interfaces';
 
-const server = 'http://localhost:3000';
-const server2 = "http://localhost:3001";
+const server = '/api/server1';
+const server2 = '/api/server2';
 
 
 export const getIndexedSites = async (): Promise<indexedSite[]> => {
     // endpoint /alladdresses
     try {
-        const response = await fetch(`${server}/returnAllAddresses`);
+        const response = await fetch(`${server2}/returnAllAddresses`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
