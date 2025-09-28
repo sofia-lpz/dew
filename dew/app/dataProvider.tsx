@@ -1,12 +1,18 @@
 // This file provides data for the application
 import { indexedSite } from './interfaces';
 
+const server = 'http://localhost:3000';
+const server2 = "http://localhost:3001";
+
 
 export const getIndexedSites = async (): Promise<indexedSite[]> => {
     // endpoint /alladdresses
     try {
-        const response = await fetch('/api/addresses', {
+        const response = await fetch(`${server2}/returnAllAddresses`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
         });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -32,8 +38,11 @@ export const getIndexedSites = async (): Promise<indexedSite[]> => {
 
 export const getSiteContent = async (address: string): Promise<{ success: boolean; html: string }> => {
     try {
-        const response = await fetch('/api/get-webpage', {
+        const response = await fetch(`${server}/getWebPage`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify({ address }),
         });
         if (!response.ok) {
@@ -48,9 +57,14 @@ export const getSiteContent = async (address: string): Promise<{ success: boolea
 };
 
 export const createContract = async (): Promise<{ success: boolean; contractAddress?: string }> => {
+
+
     try {
-        const response = await fetch('/api/generate-contract', {
+        const response = await fetch(`${server}/generateNewPageContract`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
         });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -71,8 +85,11 @@ export const setHtmlCode = async (
 ): Promise<{ success: boolean; title: string }> => {
 
     try {
-        const response = await fetch('/api/set-values', {
+        const response = await fetch(`${server}/setValuesPage`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify({ address, title, description, message }),
         });
         if (!response.ok) {
@@ -86,9 +103,14 @@ export const setHtmlCode = async (
 };
 
 export const addAddressToIndex = async (address: string, title: string): Promise<{ success: boolean }> => {
+    //endpoint add address
+
     try {
-        const response = await fetch('/api/add-address', {
+        const response = await fetch(`${server2}/addAddress`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify({ address, title }),
         });
         if (!response.ok) {
