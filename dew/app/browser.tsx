@@ -152,44 +152,53 @@ export default function Browser() {
                 <>
                     {/* Google-style header */}
                     <div className="search-header">
-                        <div className="search-container">
-                            <div className="search-bar">
-                                <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <circle cx="11" cy="11" r="8"></circle>
-                                    <path d="m21 21-4.35-4.35"></path>
-                                </svg>
-                                <input 
-                                    type="text" 
-                                    placeholder="Search rainfall..." 
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchQuery)}
-                                    className="search-input"
-                                />
-                                {searchQuery && (
-                                    <button 
-                                        className="clear-search"
-                                        onClick={() => {
-                                            setSearchQuery("");
-                                            setHasSearched(false);
-                                            setFilteredSites(indexedSites);
-                                        }}
-                                    >
-                                        ×
-                                    </button>
-                                )}
-                                <button 
-                                    className="search-button"
-                                    onClick={() => handleSearch(searchQuery)}
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <div className="search-header-content">
+                            <button className="logo-button" onClick={() => {
+                                setHasSearched(false);
+                                setSearchQuery("");
+                                setFilteredSites(indexedSites);
+                            }}>
+                                <h1 className="logo logo-small">rainfall</h1>
+                            </button>
+                            <div className="search-container">
+                                <div className="search-bar">
+                                    <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <circle cx="11" cy="11" r="8"></circle>
                                         <path d="m21 21-4.35-4.35"></path>
                                     </svg>
-                                </button>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search rainfall..." 
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchQuery)}
+                                        className="search-input"
+                                    />
+                                    {searchQuery && (
+                                        <button 
+                                            className="clear-search"
+                                            onClick={() => {
+                                                setSearchQuery("");
+                                                setHasSearched(false);
+                                                setFilteredSites(indexedSites);
+                                            }}
+                                        >
+                                            ×
+                                        </button>
+                                    )}
+                                    <button 
+                                        className="search-button"
+                                        onClick={() => handleSearch(searchQuery)}
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <path d="m21 21-4.35-4.35"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        
+
                         {/* Results info */}
                         <div className="results-info">
                             About {filteredSites.length.toLocaleString()} results
