@@ -8,7 +8,7 @@ const server2 = "http://localhost:3001";
 export const getIndexedSites = async (): Promise<indexedSite[]> => {
     // endpoint /alladdresses
     try {
-        const response = await fetch(`${server}/alladdresses`);
+        const response = await fetch(`${server}/returnAllAddresses`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -101,7 +101,7 @@ export const addAddressToIndex = async (address: string, title: string): Promise
     //endpoint add address
 
     try {
-        const response = await fetch(`${server2}/addAddressToIndex`, {
+        const response = await fetch(`${server2}/addAddress`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
