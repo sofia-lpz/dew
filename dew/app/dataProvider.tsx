@@ -124,31 +124,10 @@ export const addAddressToIndex = async (address: string, title: string): Promise
     }
 };
 
-export const openSiteContentInNewTab = async (address: string, title: string): Promise<void> => {
-    try {
-        // Fetch the site content
-        const contentResult = await getSiteContent(address);
-        
-        if (contentResult.success && contentResult.message) {
-            // Create a new window/tab
-            const newWindow = window.open('', '_blank');
-            
-            if (newWindow) {
-                // Write just the HTML content to the new window without any extra wrapper
-                newWindow.document.write(contentResult.message);
-                newWindow.document.close();
-            } else {
-                // Fallback if popup blocked - show alert
-                alert('Unable to open new tab. Please check your popup blocker settings.');
-            }
-        } else {
-            console.error('Failed to fetch site content');
-            alert('Unable to load site content. Please try again.');
-        }
-    } catch (error) {
-        console.error('Error opening site content:', error);
-        alert('An error occurred while loading the site content.');
-    }
+export const openSiteContentInNewTab = async (address: string): Promise<void> => {
+    const baseUrl = window.location.origin; // Gets the current protocol, host, and port
+    const url = `${baseUrl}/${address}`;
+    window.open(url, '_blank');
 };
 
 
