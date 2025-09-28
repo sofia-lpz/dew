@@ -52,9 +52,7 @@ export const getSiteContent = async (address: string): Promise<{ success: boolea
 };
 
 export const createContract = async (): Promise<{ success: boolean; contractAddress?: string }> => {
-    //wait three seconds and then return a mocked contract address
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    return { success: true, contractAddress: '0x1234567890abcdef' }; // Mocked response
+
 
     try {
         const response = await fetch(`${server}/generateNewPageContract`, {
@@ -80,8 +78,7 @@ export const setHtmlCode = async (
     description: string,
     message: string,
 ): Promise<{ success: boolean; title: string }> => {
-    console.log('Sending data to server:', { address, title, description, message });
-    return { success: true, title: title }; // Mocked response
+
     try {
         const response = await fetch(`${server}/setValuesPage`, {
             method: 'POST',
@@ -102,8 +99,7 @@ export const setHtmlCode = async (
 
 export const addAddressToIndex = async (address: string, title: string): Promise<{ success: boolean }> => {
     //endpoint add address
-    console.log('Adding address to index:', { address, title });
-    return { success: true }; // Mocked response
+
     try {
         const response = await fetch(`${server2}/addAddressToIndex`, {
             method: 'POST',
